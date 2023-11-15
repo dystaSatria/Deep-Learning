@@ -1,4 +1,4 @@
 # Summary
 
-* Yapay Sınır Ağları (Artif
+* Yapay Sınır Ağları (Arti
 * 5Hafta devamını bu kodu
