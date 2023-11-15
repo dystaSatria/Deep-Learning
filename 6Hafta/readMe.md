@@ -1,4 +1,4 @@
 # Summary
 
-* Yapay Sınır Ağları (Artificial
+* Yapay Sınır Ağları (Artificia
 * 5Hafta devamını bu kodu
