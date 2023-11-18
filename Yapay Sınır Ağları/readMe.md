@@ -4,8 +4,10 @@
 *  There are three layers in the network architecture: the input layer, the hidden layer (more than one), and the output layer. 
 
 > **Advantages**
-> Learn from data
-> Multitasking and Parallel Process
-> Expanding Applications
-> Effeciency and continous work
-> Cloud-Based Services
+> * Learn from data
+> * Multitasking and Parallel Process
+> * Expanding Applications
+> * Effeciency and continous work
+> * Cloud-Based Services
+> 
+
