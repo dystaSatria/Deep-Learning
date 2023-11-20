@@ -13,4 +13,8 @@
 > * Effeciency and continous work
 > * Cloud-Based Services
 
+![Contoh Gambar](https://github.com/dystaSatria/Deep-Learning/blob/main/Yapay%20S%C4%B1n%C4%B1r%20A%C4%9Flar%C4%B1/ICLH_Diagram_Batch_01_03-DeepNeuralNetwork.png)
+
+
+
 
