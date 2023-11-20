@@ -12,5 +12,35 @@
 > * Expanding Applications
 > * Effeciency and continous work
 > * Cloud-Based Services
-> 
+
+## ANN vs BNN 
+
+| Parameters           | ANN                                             | BNN                   |
+|----------------------|-------------------------------------------------|-----------------------|
+| Structure            |                                                 |                       |
+| Input                |                                                 |                       |
+| Weight               |                                                 |                       |
+| Output               |                                                 |                       |
+| Hidden Layer         |                                                 |                       |
+| Dendrites            |                                                 |                       |
+| Synapse              |                                                 |                       |
+| Axon                 |                                                 |                       |
+| Cell Body            |                                                 |                       |
+| Learning             | Very precise structures and formatted data       | They can tolerate ambiguity |
+| Processor            |                                                 |                       |
+| Complex              | High speed                                      | One or a few          |
+| Simple               | Low speed                                       | Large number          |
+| Memory               |                                                 |                       |
+| Separate from a processor | Localized                                    | Integrated into processor |
+| Non-content addressable  | Distributed                                  | Content-addressable   |
+| Computing            |                                                 |                       |
+| Centralized          | Sequential                                      | Stored programs       |
+| Distributed          | Parallel                                        | Self-learning         |
+| Reliability          | Very vulnerable                                 | Robust                |
+| Expertise            |                                                 |                       |
+| Numerical and symbolic manipulations                 | Perceptual problems   |
+| Operating Environment|                                                 |                       |
+| Well-defined         | Well-constrained                                 | Poorly defined        |
+| Un-constrained       |                                                 |                       |
+| Fault Tolerance      | The potential of fault tolerance                 | Performance degraded even on partial damage |
 
