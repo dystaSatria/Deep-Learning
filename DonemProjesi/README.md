@@ -32,9 +32,11 @@ Bu proje, Google Colab kullanarak akciğer görüntülerini analiz etmeyi amaçl
 
 ## Kullanım Kılavuzu
 
-1. [https://colab.research.google.com/](https://colab.research.google.com/) adresini ziyaret ederek Google Colab'a erişim sağlayın.
-2. Google Colab'da proje notebook'unu açın.
-3. Notebook içindeki talimatları takip ederek veri kümesini yükleyin, modeli eğitin ve akciğer görüntülerine tahminler yapın.
+1. Bu [Linkten](https://drive.google.com/file/d/1pxkEk-3t_9NHJtiKStPXpogwfsd8Ivnl/view) fotoğraf kaynakları indirin
+2. Hepsi verileri kendi google drive hesabınıza yerleştirin.
+3. [https://colab.research.google.com/](https://colab.research.google.com/) adresini ziyaret ederek Google Colab'a erişim sağlayın.
+4. Google Colab'da proje notebook'unu açın.
+5. Notebook içindeki talimatları takip ederek veri kümesini yükleyin, modeli eğitin ve akciğer görüntülerine tahminler yapın.
 
 
 
