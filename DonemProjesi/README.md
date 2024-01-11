@@ -32,11 +32,18 @@ Bu proje, Google Colab kullanarak akciğer görüntülerini analiz etmeyi amaçl
 
 ## Kullanım Kılavuzu
 
-1. Bu [Linkten](https://drive.google.com/file/d/1pxkEk-3t_9NHJtiKStPXpogwfsd8Ivnl/view) fotoğraf kaynakları indirin
-2. Hepsi verileri kendi google drive hesabınıza yerleştirin.
-3. [https://colab.research.google.com/](https://colab.research.google.com/) adresini ziyaret ederek Google Colab'a erişim sağlayın.
-4. Google Colab'da proje notebook'unu açın.
-5. Notebook içindeki talimatları takip ederek veri kümesini yükleyin, modeli eğitin ve akciğer görüntülerine tahminler yapın.
+1. Python'un yüklü olduğundan emin olun. Python'un resmi web sitesinden en son sürümü indirebilir ve yükleyebilirsiniz.
+
+2. Keras kütüphanesini yüklemek için terminal veya komut istemcisine şu komutu yazabilirsiniz:"
+   ``` pip install keras ```
+   
+3. [Linkten](https://drive.google.com/file/d/1pxkEk-3t_9NHJtiKStPXpogwfsd8Ivnl/view) fotoğraf kaynakları indirin.
+4. Numpy kütüphanesini yüklemek için terminal veya komut istemcisine şu komutu yazabilirsiniz:
+   ``` pip install numpy ```
+5. Hepsi verileri kendi google drive hesabınıza yerleştirin.
+6. [https://colab.research.google.com/](https://colab.research.google.com/) adresini ziyaret ederek Google Colab'a erişim sağlayın.
+7. Google Colab'da proje notebook'unu açın.
+8. Notebook içindeki talimatları takip ederek veri kümesini yükleyin, modeli eğitin ve akciğer görüntülerine tahminler yapın.
 
 
 
