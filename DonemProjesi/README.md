@@ -28,9 +28,10 @@ Buraya proje ile ilgili genel bir açıklama ekleyin. Projenizin amacı, kapsam�
 Projenizin dosya yapısını açıklayan bir bölüm ekleyebilirsiniz. Örneğin:
 - **/Yapay-Sinir**
   - `yapaySinir.py`
-  - `resnet.py`
 - **/CNN**
   - `cnn.py`
+- **/Resnet**
+ - `resnet.py``
 - **/Veri**
   - `cnn.py`
 - `README.md`
