@@ -29,6 +29,13 @@ Bu proje, Google Colab kullanarak akciğer görüntülerini analiz etmeyi amaçl
 - [TensorFlow](https://www.tensorflow.org/): Makine öğrenimi modellerini eğitmek ve uygulamak için kullanılan bir çerçeve.
 - [Keras](https://keras.io/): TensorFlow için yüksek seviyeli bir arayüz, makine öğrenimi modelleri oluşturmayı ve eğitmeyi kolaylaştırır.
 
+## Kullanım Kılavuzu
+1. [https://colab.research.google.com/](https://colab.research.google.com/) adresini ziyaret ederek Google Colab'a erişim sağlayın.
+2. Google Colab'da proje notebook'unu açın.
+3. Notebook içindeki talimatları takip ederek veri kümesini yükleyin, modeli eğitin ve akciğer görüntülerine tahminler yapın.
+
+
+
 ## Proje Dosya Yapısı
 
 Projenizin dosya yapısını açıklayan bir bölüm ekleyebilirsiniz. Örneğin:
