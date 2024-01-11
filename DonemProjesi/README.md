@@ -17,9 +17,9 @@
 
 ---
 
-## Proje Açıklaması
+## Proje Genel Açıklaması
 
-Bu proje, Google Colab kullanarak akciğer görüntülerini analiz etmeyi amaçlamaktadır.radyoloji görüntüleri üzerinden sağlık durumlarını tespit etmek ve sınıflandırmak için makine öğrenimi teknikleri kullanılmaktadır.
+Bu proje, Google Colab kullanarak akciğer görüntülerini analiz etmeyi amaçlamaktadır. Radyoloji görüntüleri üzerinden sağlık durumlarını tespit etmek ve sınıflandırmak için makine öğrenimi teknikleri kullanılmaktadır.
 
 ---
 
