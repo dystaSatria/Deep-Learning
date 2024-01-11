@@ -23,6 +23,12 @@ Bu proje, Google Colab kullanarak akciğer görüntülerini analiz etmeyi amaçl
 
 ---
 
+## Araçlar ve Teknolojiler
+- [Google Colab](https://colab.research.google.com/): Bulut tabanlı bir araştırma ve geliştirme platformu, kullanıcılara Python kodu yazma ve çalıştırma imkanı tanır.
+- [Python](https://www.python.org/): Bu projede kullanılan temel programlama dili.
+- [TensorFlow](https://www.tensorflow.org/): Makine öğrenimi modellerini eğitmek ve uygulamak için kullanılan bir çerçeve.
+- [Keras](https://keras.io/): TensorFlow için yüksek seviyeli bir arayüz, makine öğrenimi modelleri oluşturmayı ve eğitmeyi kolaylaştırır.
+
 ## Proje Dosya Yapısı
 
 Projenizin dosya yapısını açıklayan bir bölüm ekleyebilirsiniz. Örneğin:
