@@ -61,6 +61,16 @@ Projeyi yaparken hangi kaynaklardan bilgi edindiğinizi belirtin.
 
 ## İletişim
 
+* ### İcabi Kırgız
+
+<div align=center>
+  
+[<img  alt="Github" src="https://img.shields.io/badge/GitHub-000000.svg?&style=for-the-badge&logo=Github&logoColor=white"/>](https://github.com/Cahrion) 
+[<img  alt="Github" src="https://img.shields.io/badge/Instagram-000000.svg?&style=for-the-badge&logo=Instagram&logoColor=white"/>](https://www.instagram.com/icabi.krgz/)
+[<img  alt="Github" src="https://img.shields.io/badge/LinkedIn-000000.svg?&style=for-the-badge&logo=linkedIn&logoColor=white"/>](https://www.linkedin.com/search/results/all/?fetchDeterministicClustersOnly=true&heroEntityKey=urn%3Ali%3Afsd_profile%3AACoAADRkB_YBsnznQAqOVILPQsDeWDYp7mARlK0&keywords=i%CC%87cabi%20k%C4%B1rg%C4%B1z&origin=RICH_QUERY_SUGGESTION&position=0&searchId=72d49290-eb9b-4dea-a4e6-313158b450f3&sid=4Zp&spellCorrectionEnabled=false)
+
+
+</div>
 * ### Reza Dysta Satria
 
 <div align=center>
