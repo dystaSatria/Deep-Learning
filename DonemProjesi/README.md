@@ -19,7 +19,7 @@
 
 ## Proje Açıklaması
 
-Buraya proje ile ilgili genel bir açıklama ekleyin. Projenizin amacı, kapsamı, kullanılan teknolojiler ve belki de projenin nasıl çalıştırılacağı gibi önemli bilgileri içermelidir.
+Bu proje, Google Colab kullanarak akciğer görüntülerini analiz etmeyi amaçlamaktadır.radyoloji görüntüleri üzerinden sağlık durumlarını tespit etmek ve sınıflandırmak için makine öğrenimi teknikleri kullanılmaktadır.
 
 ---
 
