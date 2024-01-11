@@ -10,10 +10,10 @@
 
 | Öğrenci No | Adı Soyadı           | Bölüm          		   | Proje Grup No | Grup Üyelerinin Github Profilleri                 |
 |------------|----------------------|--------------------------|---------------|---------------------------------------------------|
-| 1200505011  | İcabi Kırgız		| Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
-| 5200505062  | Reza Dysta Satria   | Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
-| 1200505024     | Selim Tekin   | Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
-| 1200505069     | Yavuz Koz   | Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
+| 1200505011  | İcabi Kırgız		| Yazılım Mühendisliği     | PROJE 1       | [Github](https://github.com/balfatih)     |
+| 5200505062  | Reza Dysta Satria   | Yazılım Mühendisliği     | PROJE 1       | [Github](https://github.com/balfatih)     |
+| 1200505024     | Selim Tekin   | Yazılım Mühendisliği     | PROJE 1       | [Github](https://github.com/balfatih)     |
+| 1200505069     | Yavuz Koz   | Yazılım Mühendisliği     | PROJE 1       | [Github](https://github.com/balfatih)     |
 
 ---
 
@@ -26,14 +26,13 @@ Buraya proje ile ilgili genel bir açıklama ekleyin. Projenizin amacı, kapsam�
 ## Proje Dosya Yapısı
 
 Projenizin dosya yapısını açıklayan bir bölüm ekleyebilirsiniz. Örneğin:
-- **/src**
-  - **/components**
-    - `Component1.js`
-    - `Component2.js`
-  - **/utils**
-    - `utility.js`
-- **/public**
-  - `index.html`
+- **/Yapay-Sinir**
+  - `yapaySinir.py`
+  - `resnet.py`
+- **/CNN**
+  - `cnn.py`
+- **/Veri**
+  - `cnn.py`
 - `README.md`
 - `LICENSE`  
 
