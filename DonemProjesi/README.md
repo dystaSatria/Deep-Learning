@@ -10,9 +10,10 @@
 
 | Öğrenci No | Adı Soyadı           | Bölüm          		   | Proje Grup No | Grup Üyelerinin Github Profilleri                 |
 |------------|----------------------|--------------------------|---------------|---------------------------------------------------|
-| 123456789  | Fatih BAL			| Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
-| 987654321  | Öğrenci Adı Soyadı   | Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
-| 456789123  | Öğrenci Adı Soyadı   | Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
+| 1200505011  | İcabi Kırgız		| Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
+| 5200505062  | Reza Dysta Satria   | Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
+| 1200505024     | Selim Tekin   | Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
+| 1200505069     | Yavuz Koz   | Yazılım Mühendisliği     | PROJE_1       | [Github](https://github.com/balfatih)     |
 
 ---
 
@@ -59,5 +60,6 @@ Projeyi yaparken hangi kaynaklardan bilgi edindiğinizi belirtin.
 ---
 
 ## İletişim
+
 
 Proje ile ilgili iletişim bilgileri veya bağlantılarınızı ekleyin. Örneğin, e-posta adresleri, sosyal medya hesapları vb.
