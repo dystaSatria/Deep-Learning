@@ -70,16 +70,18 @@ Gerekli bağımlılıkların nasıl yükleneceği (veri seti, kullanılan kütü
 
 ---
 
-## Kullanım
 
-Projenin nasıl kullanılacağına dair bilgileri ekleyin. Örneğin, projenizi bir kişi bilgisayarına indirdiğinde sorunsuz bir şekilde çalıştırması için yapması gereken adımları listeleyin.
-
----
 
 ## Katkılar
 
-Projeyi yaparken hangi kaynaklardan bilgi edindiğinizi belirtin.
+Bu projeye katkıda bulunmak isterseniz, aşağıdaki adımları takip edebilirsiniz:
 
+1. Projeyi forklayın: Bu projenin sağ üst köşesinde bulunan "Fork" butonuna tıklayarak projeyi kendi GitHub hesabınıza kopyalayın.
+2. Klonlayın: Forkladığınız projeyi bilgisayarınıza klonlayın.
+
+   ```bash
+   git clone https://github.com/kendi_kullanici_adiniz/proje-adiniz.git
+   ```
 ---
 
 ## İletişim
