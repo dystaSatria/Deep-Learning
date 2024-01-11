@@ -61,7 +61,7 @@ Projeyi yaparken hangi kaynaklardan bilgi edindiğinizi belirtin.
 
 ## İletişim
 
-### Reza Dysta Satria
+* ### Reza Dysta Satria
 
 <div align=center>
   
