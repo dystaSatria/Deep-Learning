@@ -108,3 +108,7 @@ Projeyi yaparken hangi kaynaklardan bilgi edindiğinizi belirtin.
 
 </div>
 
+## License
+
+Bu proje [MIT Lisansı]() altında lisanslanmıştır. Katkıda bulunmak isterseniz, lütfen katkıda bulunma rehberimize bakın.
+   
