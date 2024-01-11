@@ -26,14 +26,20 @@ Buraya proje ile ilgili genel bir açıklama ekleyin. Projenizin amacı, kapsam�
 ## Proje Dosya Yapısı
 
 Projenizin dosya yapısını açıklayan bir bölüm ekleyebilirsiniz. Örneğin:
-- **/Yapay-Sinir**
-  - `yapaySinir.py`
-- **/CNN**
-  - `cnn.py`
-- **/Resnet**
- - `resnet.py``
-- **/Veri**
-  - `cnn.py`
+
+- `yapaySinir.py`
+- `cnn.py`
+- `resnet.py`
+- **/Veriler**
+  - **/lung_image_sets**
+       - **/lung_squamous cell carcinoma**
+       - **/lung_benign tissue**
+       - **/lung_adenocarcinoma**
+- **/Veriler 2**
+  - **/lung_image_sets**
+       - **/lung_squamous cell carcinoma**
+       - **/lung_benign tissue**
+       - **/lung_adenocarcinoma**
 - `README.md`
 - `LICENSE`  
 
