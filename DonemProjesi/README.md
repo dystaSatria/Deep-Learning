@@ -10,10 +10,10 @@
 
 | Öğrenci No | Adı Soyadı           | Bölüm          		   | Proje Grup No | Grup Üyelerinin Github Profilleri                 |
 |------------|----------------------|--------------------------|---------------|---------------------------------------------------|
-| 1200505011  | İcabi Kırgız		| Yazılım Mühendisliği     | PROJE 1       | [Github](https://github.com/balfatih)     |
-| 5200505062  | Reza Dysta Satria   | Yazılım Mühendisliği     | PROJE 1       | [Github](https://github.com/balfatih)     |
-| 1200505024     | Selim Tekin   | Yazılım Mühendisliği     | PROJE 1       | [Github](https://github.com/balfatih)     |
-| 1200505069     | Yavuz Koz   | Yazılım Mühendisliği     | PROJE 1       | [Github](https://github.com/balfatih)     |
+| 1200505011  | İcabi Kırgız		| Yazılım Mühendisliği     | PROJE 13       | [Github](https://github.com/balfatih)     |
+| 5200505062  | Reza Dysta Satria   | Yazılım Mühendisliği     | PROJE 13       | [Github](https://github.com/balfatih)     |
+| 1200505024     | Selim Tekin   | Yazılım Mühendisliği     | PROJE 13       | [Github](https://github.com/balfatih)     |
+| 1200505069     | Yavuz Koz   | Yazılım Mühendisliği     | PROJE 13       | [Github](https://github.com/balfatih)     |
 
 ---
 
@@ -110,5 +110,5 @@ Projeyi yaparken hangi kaynaklardan bilgi edindiğinizi belirtin.
 
 ## License
 
-Bu proje [MIT Lisansı]() altında lisanslanmıştır. Katkıda bulunmak isterseniz, lütfen katkıda bulunma rehberimize bakın.
+Bu proje [MIT Lisansı](https://license.md/licenses/mit-license/) altında lisanslanmıştır. Katkıda bulunmak isterseniz, lütfen katkıda bulunma rehberimize bakın.
    
