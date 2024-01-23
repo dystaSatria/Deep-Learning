@@ -1,4 +1,4 @@
-# Deep Learning Project
+# Deep Learning Bundle Projects
 
 ## Project Overview
 This repository contains the code and resources for a deep learning project focused on image classification using Convolutional Neural Networks (CNNs). The objective is to train a model capable of accurately classifying images into predefined categories.
