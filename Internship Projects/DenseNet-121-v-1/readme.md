@@ -2,7 +2,7 @@
 
 - To slow to train this data which wasting so many times
 
-Solve :
+Çözüm :
 
 - keras.applications.DenseNet121'den önceden eğitilmiş bir model kullanıyor olabilir.
 
