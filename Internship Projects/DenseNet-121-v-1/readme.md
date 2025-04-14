@@ -1,5 +1,6 @@
 # DenseNet 121 Version of 1 
 
+Problem :
 - To slow to train this data which wasting so many times
 
 Çözüm :
