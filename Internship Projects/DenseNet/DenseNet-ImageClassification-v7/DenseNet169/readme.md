@@ -1,3 +1,418 @@
+
+
+Bu belge, DenseNet169 ve çeşitli makine öğrenimi sınıflandırıcılarını birleştiren görüntü sınıflandırma sisteminin kodunu ayrıntılı olarak açıklamaktadır.
+
+## İçindekiler
+
+1. [Kütüphaneler ve Bağımlılıklar](#kütüphaneler-ve-bağımlılıklar)
+2. [Sabitler ve Konfigürasyon](#sabitler-ve-konfigürasyon)
+3. [Metrik Hesaplama Fonksiyonları](#metrik-hesaplama-fonksiyonları)
+4. [Özellik Çıkarma Fonksiyonları](#özellik-çıkarma-fonksiyonları)
+5. [DenseNet169 Model Oluşturma](#densenet169-model-oluşturma)
+6. [Eğitim ve Değerlendirme Fonksiyonları](#eğitim-ve-değerlendirme-fonksiyonları)
+7. [Sınıflandırıcı Fonksiyonları](#sınıflandırıcı-fonksiyonları)
+8. [Görselleştirme Fonksiyonları](#görselleştirme-fonksiyonları)
+9. [Ana Çalıştırma Fonksiyonu](#ana-çalıştırma-fonksiyonu)
+10. [Kullanım Örneği](#kullanım-örneği)
+
+## Kütüphaneler ve Bağımlılıklar
+
+Kod, aşağıdaki kütüphaneleri içe aktarır:
+
+```python
+import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score,
+    f1_score, confusion_matrix, matthews_corrcoef,
+    cohen_kappa_score, fbeta_score, roc_curve, auc,
+    precision_recall_curve, average_precision_score
+)
+from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier
+from sklearn.multiclass import OneVsRestClassifier
+import tensorflow as tf
+from tensorflow.keras.applications import DenseNet169
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
+from tensorflow.keras.optimizers import RMSprop
+from tensorflow.keras.callbacks import EarlyStopping
+```
+
+Kod ayrıca aşağıdaki opsiyonel kütüphaneleri içe aktarmaya çalışır:
+
+```python
+try:
+    import lightgbm as lgbm
+    LIGHTGBM_AVAILABLE = True
+except ImportError:
+    LIGHTGBM_AVAILABLE = False
+    print("Warning: LightGBM is not installed. Skipping LightGBM classifier.")
+
+try:
+    from catboost import CatBoostClassifier
+    CATBOOST_AVAILABLE = True
+except (ImportError, ValueError) as e:
+    CATBOOST_AVAILABLE = False
+    print(f"Warning: CatBoost cannot be used. Error: {e}. Skipping CatBoost classifier.")
+
+try:
+    import xgboost as xgb
+    XGBOOST_AVAILABLE = True
+except ImportError:
+    XGBOOST_AVAILABLE = False
+    print("Warning: XGBoost is not installed. Skipping XGBoost classifier.")
+```
+
+Bu yapı, belirli kütüphaneler yüklü değilse bile kodun çalışmaya devam etmesini sağlar; sadece ilgili sınıflandırıcılar atlanır.
+
+Rastgeleliği kontrol etmek için rastgele tohum değerleri ayarlanır:
+
+```python
+import random as python_random
+np.random.seed(42)
+python_random.seed(42)
+tf.random.set_seed(42)
+```
+
+## Sabitler ve Konfigürasyon
+
+Kod, aşağıdaki sabit değerleri tanımlar:
+
+```python
+IMAGE_SIZE = (150, 150)  # Girdi görüntülerinin boyutu
+BATCH_SIZE = 32          # Eğitim batch boyutu
+EPOCHS = 30              # Maksimum epoch sayısı
+LEARNING_RATE = 0.0001   # Öğrenme oranı
+VAL_SPLIT = 0.2          # Doğrulama veri kümesi için ayrılan oran
+```
+
+## Metrik Hesaplama Fonksiyonları
+
+### 1. calculate_specificity
+
+Bu fonksiyon, çok sınıflı sınıflandırma için özgüllük (specificty) metriğini hesaplar.
+
+```python
+def calculate_specificity(y_true, y_pred):
+    """Calculate specificity for multi-class classification
+
+    Specificity = TN / (TN + FP)
+    """
+    cm = confusion_matrix(y_true, y_pred)
+    fp = cm.sum(axis=0) - np.diag(cm)
+    tn = cm.sum() - (fp + np.diag(cm) + cm.sum(axis=1) - np.diag(cm))
+    specificity = np.zeros_like(tn, dtype=float)
+    for i in range(len(specificity)):
+        if tn[i] + fp[i] > 0:
+            specificity[i] = tn[i] / (tn[i] + fp[i])
+        else:
+            specificity[i] = 0.0
+
+    # Ağırlıklı ortalama özgüllük değerini döndür
+    return np.average(specificity, weights=np.bincount(y_true) if len(np.unique(y_true)) > 1 else None)
+```
+
+### 2. calculate_metrics
+
+Bu fonksiyon, tüm gerekli metrikleri hesaplar:
+
+```python
+def calculate_metrics(y_true, y_pred):
+    """Calculate all required metrics"""
+    metrics = {}
+
+    # Temel metrikler
+    metrics['accuracy'] = accuracy_score(y_true, y_pred)
+    metrics['precision'] = precision_score(y_true, y_pred, average='weighted')
+    metrics['recall'] = recall_score(y_true, y_pred, average='weighted')
+
+    # F-skorları
+    metrics['f1'] = f1_score(y_true, y_pred, average='weighted')
+    metrics['f2'] = fbeta_score(y_true, y_pred, beta=2, average='weighted')
+    metrics['f0'] = fbeta_score(y_true, y_pred, beta=0.5, average='weighted')
+
+    # Özgüllük - kendi özel fonksiyonumuzu kullanarak
+    metrics['specificity'] = calculate_specificity(y_true, y_pred)
+
+    # İleri düzey metrikler
+    metrics['mcc'] = matthews_corrcoef(y_true, y_pred)
+    metrics['kappa'] = cohen_kappa_score(y_true, y_pred)
+
+    return metrics
+```
+
+### 3. calculate_per_class_metrics
+
+Bu fonksiyon, her sınıf için metrikleri hesaplar:
+
+```python
+def calculate_per_class_metrics(y_true, y_pred, class_names):
+    """Calculate metrics for each class"""
+    n_classes = len(class_names)
+
+    # Sonuçlar sözlüğünü başlat
+    results = {
+        'class': class_names,
+        'accuracy': [],
+        'precision': [],
+        'recall': [],
+        'specificity': [],
+        'f0': [],
+        'f1': [],
+        'f2': [],
+        'kappa': [],
+        'mcc': []
+    }
+
+    # Sınıf bazlı hesaplamalar için one-hot kodlamaya dönüştür
+    y_true_bin = np.zeros((len(y_true), n_classes))
+    y_pred_bin = np.zeros((len(y_pred), n_classes))
+
+    for i in range(len(y_true)):
+        y_true_bin[i, y_true[i]] = 1
+
+    for i in range(len(y_pred)):
+        y_pred_bin[i, y_pred[i]] = 1
+
+    # Karışıklık matrisini hesapla
+    cm = confusion_matrix(y_true, y_pred)
+
+    # Her sınıf için metrikleri hesapla
+    for i in range(n_classes):
+        # İkili metrikler için, mevcut sınıfı pozitif ve diğer tüm sınıfları negatif olarak ele alırız
+        tp = cm[i, i]  # Doğru pozitifler
+        fp = np.sum(cm[:, i]) - tp  # Yanlış pozitifler
+        fn = np.sum(cm[i, :]) - tp  # Yanlış negatifler
+        tn = np.sum(cm) - tp - fp - fn  # Doğru negatifler
+
+        # Doğruluk
+        accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+        results['accuracy'].append(accuracy)
+
+        # Kesinlik
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        results['precision'].append(precision)
+
+        # Duyarlılık / Hassasiyet
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        results['recall'].append(recall)
+
+        # Özgüllük
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+        results['specificity'].append(specificity)
+
+        # F-ölçümleri
+        if precision + recall > 0:
+            f1 = 2 * precision * recall / (precision + recall)
+            f2 = 5 * precision * recall / (4 * precision + recall)
+            f0 = 1.25 * precision * recall / (0.25 * precision + recall)
+        else:
+            f1 = f2 = f0 = 0
+
+        results['f1'].append(f1)
+        results['f2'].append(f2)
+        results['f0'].append(f0)
+
+        # MCC ve Kappa için, sklearn fonksiyonlarını ikili sınıflandırma üzerinde kullanacağız
+        # mevcut sınıfı pozitif ve diğer tüm sınıfları negatif olarak ele alarak
+        y_true_class = (y_true == i).astype(int)
+        y_pred_class = (y_pred == i).astype(int)
+
+        results['mcc'].append(matthews_corrcoef(y_true_class, y_pred_class))
+        results['kappa'].append(cohen_kappa_score(y_true_class, y_pred_class))
+
+    return pd.DataFrame(results)
+```
+
+## Özellik Çıkarma Fonksiyonları
+
+### 1. create_feature_extractor
+
+Bu fonksiyon, DenseNet169'den özellik çıkarmak için bir model oluşturur:
+
+```python
+def create_feature_extractor():
+    # Önceden eğitilmiş ağırlıklarla DenseNet169'i yükle
+    base_model = DenseNet169(
+        weights='imagenet',
+        include_top=False,
+        input_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3)
+    )
+
+    # Tüm temel model katmanlarını dondur
+    for layer in base_model.layers:
+        layer.trainable = False
+
+    # Global havuzlama katmanı ekle
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+
+    # Model oluştur
+    model = Model(inputs=base_model.input, outputs=x)
+
+    return model
+```
+
+### 2. extract_features
+
+Bu fonksiyon, veri üreteçlerinden özellikler çıkarır:
+
+```python
+def extract_features(feature_extractor, data_generator):
+    features = []
+    labels = []
+
+    # Tüm batch'ler için özellikler çıkar
+    num_batches = len(data_generator)
+    for i in range(num_batches):
+        x_batch, y_batch = data_generator[i]
+        batch_features = feature_extractor.predict(x_batch, verbose=0)
+        features.append(batch_features)
+        labels.append(np.argmax(y_batch, axis=1))
+
+    # Özellikleri ve etiketleri birleştir
+    features = np.concatenate(features, axis=0)
+    labels = np.concatenate(labels, axis=0)
+
+    return features, labels
+```
+
+## DenseNet169 Model Oluşturma
+
+### build_densenet_model
+
+Bu fonksiyon, ReLU aktivasyonu ve 1024 nöronlu Yoğun katman içeren modifiye edilmiş bir DenseNet169 modeli oluşturur:
+
+```python
+def build_densenet_model(num_classes):
+    # Önceden eğitilmiş ağırlıklarla DenseNet169'i yükle
+    base_model = DenseNet169(
+        weights='imagenet',
+        include_top=False,
+        input_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3)
+    )
+
+    # Tüm temel model katmanlarını dondur
+    for layer in base_model.layers:
+        layer.trainable = False
+
+    # Sınıflandırma katmanları ekle
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    # Yoğun katmanı 1024 nöron ile açıkça ReLU aktivasyonunu kullanarak değiştir
+    x = Dense(1024, activation='relu')(x)
+    x = Dropout(0.5)(x)
+    predictions = Dense(num_classes, activation='softmax')(x)
+
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    # RMSprop optimizer ve belirtilen öğrenme oranıyla derle
+    model.compile(
+        optimizer=RMSprop(learning_rate=LEARNING_RATE),
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    return model
+```
+
+## Eğitim ve Değerlendirme Fonksiyonları
+
+### 1. fast_train
+
+Bu fonksiyon, geçmiş döndüren basitleştirilmiş bir eğitim fonksiyonudur:
+
+```python
+def fast_train(model, train_generator, validation_generator):
+    # Aşırı uyumu önlemek için erken durdurma
+    early_stop = EarlyStopping(
+        monitor='val_loss',
+        patience=5,
+        restore_best_weights=True
+    )
+
+    # Modifiye edilmiş epoch'larla eğitim
+    history = model.fit(
+        train_generator,
+        validation_data=validation_generator,
+        epochs=EPOCHS,
+        callbacks=[early_stop],
+        verbose=1
+    )
+
+    return model, history
+```
+
+### 2. evaluate_densenet
+
+Bu fonksiyon, temel DenseNet169 için değerlendirme yapar ve tahminler getirir:
+
+```python
+def evaluate_densenet(model, test_generator):
+    # Tahminleri al
+    y_pred_prob = model.predict(test_generator, verbose=1)
+    y_pred = np.argmax(y_pred_prob, axis=1)
+    y_true = test_generator.classes
+
+    # Metrikleri hesapla
+    metrics = calculate_metrics(y_true, y_pred)
+
+    return metrics, y_true, y_pred, y_pred_prob
+```
+
+## Sınıflandırıcı Fonksiyonları
+
+### 1. SVM Sınıflandırıcı
+
+```python
+def train_and_evaluate_svm(train_features, train_labels, test_features, test_labels, kernel='linear'):
+    print(f"Training SVM with {kernel} kernel...")
+
+    # SVM sınıflandırıcı oluştur ve eğit
+    svm = SVC(kernel=kernel, probability=True, random_state=42)
+    svm.fit(train_features, train_labels)
+
+    # Tahminleri al
+    y_pred = svm.predict(test_features)
+    y_pred_prob = svm.predict_proba(test_features)
+
+    # Metrikleri hesapla
+    metrics = calculate_metrics(test_labels, y_pred)
+
+    # Metrikler sözlüğüne model adını ekle
+    metrics['model'] = f"DenseNet169 + SVM ({kernel})"
+
+    return metrics, y_pred, y_pred_prob
+```
+
+### 2. Gradient Boosting Sınıflandırıcı
+
+```python
+def train_and_evaluate_gradient_boosting(train_features, train_labels, test_features, test_labels):
+    print("Training Gradient Boosting classifier...")
+
+    # Gradient Boosting sınıflandırıcı oluştur ve eğit
+    gb = GradientBoostingClassifier(n_estimators=100, random_state=42)
+    gb.fit(train_features, train_labels)
+
+    # Tahminleri al
+    y_pred = gb.predict(test_features)
+    y_pred_prob = gb.predict_proba(test_features)
+
+    # Metrikleri hesapla
+    metrics = calculate_metrics(test_labels, y_pred)
+
+    # Metrikler sözlüğüne model adını ekle
+    metrics['model'] = "DenseNet169 + Gradient Boosting"
+
+    return metrics, y_pred, y_pred_prob
+```
+
 ### 3. LightGBM Sınıflandırıcı
 
 ```python
@@ -951,418 +1366,3 @@ Tüm sonuçlar, daha sonra inceleme için CSV dosyalarına ve yüksek çözünü
 5. **Veri Dengesizliği**: Dengesiz veri kümeleri için sınıf ağırlıkları veya örnekleme stratejileri eklenebilir.
 
 Bu kod, özellikle görüntü sınıflandırması için sağlam, kapsamlı ve genişletilebilir bir çerçeve sağlar. Transfer öğrenimi ilkeleri uygulanarak, derin öğrenme özellik çıkarma yetenekleri geleneksel makine öğrenimi yöntemleriyle verimli bir şekilde birleştirilir.# DenseNet169 Hibrit Sınıflandırma Kodu Detaylı Açıklaması
-
-Bu belge, DenseNet169 ve çeşitli makine öğrenimi sınıflandırıcılarını birleştiren görüntü sınıflandırma sisteminin kodunu ayrıntılı olarak açıklamaktadır.
-
-## İçindekiler
-
-1. [Kütüphaneler ve Bağımlılıklar](#kütüphaneler-ve-bağımlılıklar)
-2. [Sabitler ve Konfigürasyon](#sabitler-ve-konfigürasyon)
-3. [Metrik Hesaplama Fonksiyonları](#metrik-hesaplama-fonksiyonları)
-4. [Özellik Çıkarma Fonksiyonları](#özellik-çıkarma-fonksiyonları)
-5. [DenseNet169 Model Oluşturma](#densenet169-model-oluşturma)
-6. [Eğitim ve Değerlendirme Fonksiyonları](#eğitim-ve-değerlendirme-fonksiyonları)
-7. [Sınıflandırıcı Fonksiyonları](#sınıflandırıcı-fonksiyonları)
-8. [Görselleştirme Fonksiyonları](#görselleştirme-fonksiyonları)
-9. [Ana Çalıştırma Fonksiyonu](#ana-çalıştırma-fonksiyonu)
-10. [Kullanım Örneği](#kullanım-örneği)
-
-## Kütüphaneler ve Bağımlılıklar
-
-Kod, aşağıdaki kütüphaneleri içe aktarır:
-
-```python
-import os
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score,
-    f1_score, confusion_matrix, matthews_corrcoef,
-    cohen_kappa_score, fbeta_score, roc_curve, auc,
-    precision_recall_curve, average_precision_score
-)
-from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier
-from sklearn.multiclass import OneVsRestClassifier
-import tensorflow as tf
-from tensorflow.keras.applications import DenseNet169
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
-from tensorflow.keras.optimizers import RMSprop
-from tensorflow.keras.callbacks import EarlyStopping
-```
-
-Kod ayrıca aşağıdaki opsiyonel kütüphaneleri içe aktarmaya çalışır:
-
-```python
-try:
-    import lightgbm as lgbm
-    LIGHTGBM_AVAILABLE = True
-except ImportError:
-    LIGHTGBM_AVAILABLE = False
-    print("Warning: LightGBM is not installed. Skipping LightGBM classifier.")
-
-try:
-    from catboost import CatBoostClassifier
-    CATBOOST_AVAILABLE = True
-except (ImportError, ValueError) as e:
-    CATBOOST_AVAILABLE = False
-    print(f"Warning: CatBoost cannot be used. Error: {e}. Skipping CatBoost classifier.")
-
-try:
-    import xgboost as xgb
-    XGBOOST_AVAILABLE = True
-except ImportError:
-    XGBOOST_AVAILABLE = False
-    print("Warning: XGBoost is not installed. Skipping XGBoost classifier.")
-```
-
-Bu yapı, belirli kütüphaneler yüklü değilse bile kodun çalışmaya devam etmesini sağlar; sadece ilgili sınıflandırıcılar atlanır.
-
-Rastgeleliği kontrol etmek için rastgele tohum değerleri ayarlanır:
-
-```python
-import random as python_random
-np.random.seed(42)
-python_random.seed(42)
-tf.random.set_seed(42)
-```
-
-## Sabitler ve Konfigürasyon
-
-Kod, aşağıdaki sabit değerleri tanımlar:
-
-```python
-IMAGE_SIZE = (150, 150)  # Girdi görüntülerinin boyutu
-BATCH_SIZE = 32          # Eğitim batch boyutu
-EPOCHS = 30              # Maksimum epoch sayısı
-LEARNING_RATE = 0.0001   # Öğrenme oranı
-VAL_SPLIT = 0.2          # Doğrulama veri kümesi için ayrılan oran
-```
-
-## Metrik Hesaplama Fonksiyonları
-
-### 1. calculate_specificity
-
-Bu fonksiyon, çok sınıflı sınıflandırma için özgüllük (specificty) metriğini hesaplar.
-
-```python
-def calculate_specificity(y_true, y_pred):
-    """Calculate specificity for multi-class classification
-
-    Specificity = TN / (TN + FP)
-    """
-    cm = confusion_matrix(y_true, y_pred)
-    fp = cm.sum(axis=0) - np.diag(cm)
-    tn = cm.sum() - (fp + np.diag(cm) + cm.sum(axis=1) - np.diag(cm))
-    specificity = np.zeros_like(tn, dtype=float)
-    for i in range(len(specificity)):
-        if tn[i] + fp[i] > 0:
-            specificity[i] = tn[i] / (tn[i] + fp[i])
-        else:
-            specificity[i] = 0.0
-
-    # Ağırlıklı ortalama özgüllük değerini döndür
-    return np.average(specificity, weights=np.bincount(y_true) if len(np.unique(y_true)) > 1 else None)
-```
-
-### 2. calculate_metrics
-
-Bu fonksiyon, tüm gerekli metrikleri hesaplar:
-
-```python
-def calculate_metrics(y_true, y_pred):
-    """Calculate all required metrics"""
-    metrics = {}
-
-    # Temel metrikler
-    metrics['accuracy'] = accuracy_score(y_true, y_pred)
-    metrics['precision'] = precision_score(y_true, y_pred, average='weighted')
-    metrics['recall'] = recall_score(y_true, y_pred, average='weighted')
-
-    # F-skorları
-    metrics['f1'] = f1_score(y_true, y_pred, average='weighted')
-    metrics['f2'] = fbeta_score(y_true, y_pred, beta=2, average='weighted')
-    metrics['f0'] = fbeta_score(y_true, y_pred, beta=0.5, average='weighted')
-
-    # Özgüllük - kendi özel fonksiyonumuzu kullanarak
-    metrics['specificity'] = calculate_specificity(y_true, y_pred)
-
-    # İleri düzey metrikler
-    metrics['mcc'] = matthews_corrcoef(y_true, y_pred)
-    metrics['kappa'] = cohen_kappa_score(y_true, y_pred)
-
-    return metrics
-```
-
-### 3. calculate_per_class_metrics
-
-Bu fonksiyon, her sınıf için metrikleri hesaplar:
-
-```python
-def calculate_per_class_metrics(y_true, y_pred, class_names):
-    """Calculate metrics for each class"""
-    n_classes = len(class_names)
-
-    # Sonuçlar sözlüğünü başlat
-    results = {
-        'class': class_names,
-        'accuracy': [],
-        'precision': [],
-        'recall': [],
-        'specificity': [],
-        'f0': [],
-        'f1': [],
-        'f2': [],
-        'kappa': [],
-        'mcc': []
-    }
-
-    # Sınıf bazlı hesaplamalar için one-hot kodlamaya dönüştür
-    y_true_bin = np.zeros((len(y_true), n_classes))
-    y_pred_bin = np.zeros((len(y_pred), n_classes))
-
-    for i in range(len(y_true)):
-        y_true_bin[i, y_true[i]] = 1
-
-    for i in range(len(y_pred)):
-        y_pred_bin[i, y_pred[i]] = 1
-
-    # Karışıklık matrisini hesapla
-    cm = confusion_matrix(y_true, y_pred)
-
-    # Her sınıf için metrikleri hesapla
-    for i in range(n_classes):
-        # İkili metrikler için, mevcut sınıfı pozitif ve diğer tüm sınıfları negatif olarak ele alırız
-        tp = cm[i, i]  # Doğru pozitifler
-        fp = np.sum(cm[:, i]) - tp  # Yanlış pozitifler
-        fn = np.sum(cm[i, :]) - tp  # Yanlış negatifler
-        tn = np.sum(cm) - tp - fp - fn  # Doğru negatifler
-
-        # Doğruluk
-        accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
-        results['accuracy'].append(accuracy)
-
-        # Kesinlik
-        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-        results['precision'].append(precision)
-
-        # Duyarlılık / Hassasiyet
-        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-        results['recall'].append(recall)
-
-        # Özgüllük
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-        results['specificity'].append(specificity)
-
-        # F-ölçümleri
-        if precision + recall > 0:
-            f1 = 2 * precision * recall / (precision + recall)
-            f2 = 5 * precision * recall / (4 * precision + recall)
-            f0 = 1.25 * precision * recall / (0.25 * precision + recall)
-        else:
-            f1 = f2 = f0 = 0
-
-        results['f1'].append(f1)
-        results['f2'].append(f2)
-        results['f0'].append(f0)
-
-        # MCC ve Kappa için, sklearn fonksiyonlarını ikili sınıflandırma üzerinde kullanacağız
-        # mevcut sınıfı pozitif ve diğer tüm sınıfları negatif olarak ele alarak
-        y_true_class = (y_true == i).astype(int)
-        y_pred_class = (y_pred == i).astype(int)
-
-        results['mcc'].append(matthews_corrcoef(y_true_class, y_pred_class))
-        results['kappa'].append(cohen_kappa_score(y_true_class, y_pred_class))
-
-    return pd.DataFrame(results)
-```
-
-## Özellik Çıkarma Fonksiyonları
-
-### 1. create_feature_extractor
-
-Bu fonksiyon, DenseNet169'den özellik çıkarmak için bir model oluşturur:
-
-```python
-def create_feature_extractor():
-    # Önceden eğitilmiş ağırlıklarla DenseNet169'i yükle
-    base_model = DenseNet169(
-        weights='imagenet',
-        include_top=False,
-        input_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3)
-    )
-
-    # Tüm temel model katmanlarını dondur
-    for layer in base_model.layers:
-        layer.trainable = False
-
-    # Global havuzlama katmanı ekle
-    x = base_model.output
-    x = GlobalAveragePooling2D()(x)
-
-    # Model oluştur
-    model = Model(inputs=base_model.input, outputs=x)
-
-    return model
-```
-
-### 2. extract_features
-
-Bu fonksiyon, veri üreteçlerinden özellikler çıkarır:
-
-```python
-def extract_features(feature_extractor, data_generator):
-    features = []
-    labels = []
-
-    # Tüm batch'ler için özellikler çıkar
-    num_batches = len(data_generator)
-    for i in range(num_batches):
-        x_batch, y_batch = data_generator[i]
-        batch_features = feature_extractor.predict(x_batch, verbose=0)
-        features.append(batch_features)
-        labels.append(np.argmax(y_batch, axis=1))
-
-    # Özellikleri ve etiketleri birleştir
-    features = np.concatenate(features, axis=0)
-    labels = np.concatenate(labels, axis=0)
-
-    return features, labels
-```
-
-## DenseNet169 Model Oluşturma
-
-### build_densenet_model
-
-Bu fonksiyon, ReLU aktivasyonu ve 1024 nöronlu Yoğun katman içeren modifiye edilmiş bir DenseNet169 modeli oluşturur:
-
-```python
-def build_densenet_model(num_classes):
-    # Önceden eğitilmiş ağırlıklarla DenseNet169'i yükle
-    base_model = DenseNet169(
-        weights='imagenet',
-        include_top=False,
-        input_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3)
-    )
-
-    # Tüm temel model katmanlarını dondur
-    for layer in base_model.layers:
-        layer.trainable = False
-
-    # Sınıflandırma katmanları ekle
-    x = base_model.output
-    x = GlobalAveragePooling2D()(x)
-    # Yoğun katmanı 1024 nöron ile açıkça ReLU aktivasyonunu kullanarak değiştir
-    x = Dense(1024, activation='relu')(x)
-    x = Dropout(0.5)(x)
-    predictions = Dense(num_classes, activation='softmax')(x)
-
-    model = Model(inputs=base_model.input, outputs=predictions)
-
-    # RMSprop optimizer ve belirtilen öğrenme oranıyla derle
-    model.compile(
-        optimizer=RMSprop(learning_rate=LEARNING_RATE),
-        loss='categorical_crossentropy',
-        metrics=['accuracy']
-    )
-
-    return model
-```
-
-## Eğitim ve Değerlendirme Fonksiyonları
-
-### 1. fast_train
-
-Bu fonksiyon, geçmiş döndüren basitleştirilmiş bir eğitim fonksiyonudur:
-
-```python
-def fast_train(model, train_generator, validation_generator):
-    # Aşırı uyumu önlemek için erken durdurma
-    early_stop = EarlyStopping(
-        monitor='val_loss',
-        patience=5,
-        restore_best_weights=True
-    )
-
-    # Modifiye edilmiş epoch'larla eğitim
-    history = model.fit(
-        train_generator,
-        validation_data=validation_generator,
-        epochs=EPOCHS,
-        callbacks=[early_stop],
-        verbose=1
-    )
-
-    return model, history
-```
-
-### 2. evaluate_densenet
-
-Bu fonksiyon, temel DenseNet169 için değerlendirme yapar ve tahminler getirir:
-
-```python
-def evaluate_densenet(model, test_generator):
-    # Tahminleri al
-    y_pred_prob = model.predict(test_generator, verbose=1)
-    y_pred = np.argmax(y_pred_prob, axis=1)
-    y_true = test_generator.classes
-
-    # Metrikleri hesapla
-    metrics = calculate_metrics(y_true, y_pred)
-
-    return metrics, y_true, y_pred, y_pred_prob
-```
-
-## Sınıflandırıcı Fonksiyonları
-
-### 1. SVM Sınıflandırıcı
-
-```python
-def train_and_evaluate_svm(train_features, train_labels, test_features, test_labels, kernel='linear'):
-    print(f"Training SVM with {kernel} kernel...")
-
-    # SVM sınıflandırıcı oluştur ve eğit
-    svm = SVC(kernel=kernel, probability=True, random_state=42)
-    svm.fit(train_features, train_labels)
-
-    # Tahminleri al
-    y_pred = svm.predict(test_features)
-    y_pred_prob = svm.predict_proba(test_features)
-
-    # Metrikleri hesapla
-    metrics = calculate_metrics(test_labels, y_pred)
-
-    # Metrikler sözlüğüne model adını ekle
-    metrics['model'] = f"DenseNet169 + SVM ({kernel})"
-
-    return metrics, y_pred, y_pred_prob
-```
-
-### 2. Gradient Boosting Sınıflandırıcı
-
-```python
-def train_and_evaluate_gradient_boosting(train_features, train_labels, test_features, test_labels):
-    print("Training Gradient Boosting classifier...")
-
-    # Gradient Boosting sınıflandırıcı oluştur ve eğit
-    gb = GradientBoostingClassifier(n_estimators=100, random_state=42)
-    gb.fit(train_features, train_labels)
-
-    # Tahminleri al
-    y_pred = gb.predict(test_features)
-    y_pred_prob = gb.predict_proba(test_features)
-
-    # Metrikleri hesapla
-    metrics = calculate_metrics(test_labels, y_pred)
-
-    # Metrikler sözlüğüne model adını ekle
-    metrics['model'] = "DenseNet169 + Gradient Boosting"
-
-    return metrics, y_pred, y_pred_prob
-```
-
-### 3. LightGBM Sınıflandır
