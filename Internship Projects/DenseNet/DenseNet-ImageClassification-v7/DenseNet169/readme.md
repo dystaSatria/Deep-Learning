@@ -1,3 +1,4 @@
+# DenseNet169 Hibrit Sınıflandırma Kodu Detaylı Açıklaması
 
 
 Bu belge, DenseNet169 ve çeşitli makine öğrenimi sınıflandırıcılarını birleştiren görüntü sınıflandırma sisteminin kodunu ayrıntılı olarak açıklamaktadır.
