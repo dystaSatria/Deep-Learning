@@ -1,4 +1,4 @@
-# DENSENET_Optuna Hyperparameter
+# DENSENET121_Optuna Hyperparameter
 
 ---
 
