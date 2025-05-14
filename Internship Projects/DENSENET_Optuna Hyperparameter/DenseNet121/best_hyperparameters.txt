@@ -1,0 +1,40 @@
+svm:
+    kernel: rbf
+    C: 2.7113712127702825
+    gamma: auto
+
+gradient_boosting:
+    n_estimators: 235
+    learning_rate: 0.14606795511636736
+    max_depth: 7
+    min_samples_split: 18
+    min_samples_leaf: 4
+
+xgboost:
+    n_estimators: 248
+    learning_rate: 0.17860456224464882
+    max_depth: 10
+    min_child_weight: 9
+    gamma: 0.34335823826837786
+    subsample: 0.6736099875906476
+    colsample_bytree: 0.8536386918949959
+
+lightgbm:
+    n_estimators: 282
+    learning_rate: 0.1024278577587754
+    num_leaves: 26
+    max_depth: 11
+    min_child_samples: 6
+    subsample: 0.7327518472896238
+    colsample_bytree: 0.9528938620086789
+
+densenet:
+    dense_neurons: 2048
+    dropout_rate: 0.6601933401645291
+    optimizer: adam
+    learning_rate: 0.0004570153474251124
+    aug_rotation: 14
+    aug_width_shift: 0.09638249171815595
+    aug_height_shift: 0.12093167875311582
+    aug_zoom: 0.12310839921142704
+
