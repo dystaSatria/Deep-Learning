@@ -1,0 +1,7 @@
+Model,ROC AUC
+DenseNet169 + LightGBM,0.9054
+DenseNet169 + Gradient Boosting,0.8993
+DenseNet169 + XGBoost,0.8990
+DenseNet169 (Optimized),0.8968
+DenseNet169 + CatBoost,0.8778
+DenseNet169 + AdaBoost,0.7891
